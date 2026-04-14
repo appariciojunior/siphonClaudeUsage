@@ -37,8 +37,12 @@ private struct MenuBarLabel: View {
     @ObservedObject var store: UsageStore
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 4) {
+            // Icon — always visible
+            CodeMenuIcon()
+
             if let q = store.quota, let session = q.session {
+                // Signed in: icon + session % · weekly %
                 let sessionColor: Color = session.percent >= 90 ? .red : session.percent >= 70 ? .orange : .green
                 Text("\(Int(session.percent.rounded()))%")
                     .font(.custom("Inter-SemiBold", size: 11))
@@ -46,7 +50,7 @@ private struct MenuBarLabel: View {
 
                 if let weekly = q.weeklyAll {
                     Text("·")
-                        .font(.system(size: 10))
+                        .font(.system(size: 9))
                         .foregroundStyle(.secondary)
                     let weekColor: Color = weekly.percent >= 90 ? .red : weekly.percent >= 70 ? .orange : .primary
                     Text("\(Int(weekly.percent.rounded()))%")
@@ -54,7 +58,9 @@ private struct MenuBarLabel: View {
                         .foregroundStyle(weekColor)
                 }
             } else {
-                CodeMenuIcon()
+                // Logged out: icon + "Siphon"
+                Text("Siphon")
+                    .font(.custom("Inter-SemiBold", size: 12))
             }
         }
     }
@@ -63,8 +69,8 @@ private struct MenuBarLabel: View {
 // MARK: - Code icon (light/dark adaptive template image)
 
 private struct CodeMenuIcon: View {
-    /// Loaded once, marked as template so AppKit renders it white on dark
-    /// menu bars and black on light menu bars automatically.
+    /// Loaded once; isTemplate=true makes macOS auto-render white on dark
+    /// menu bars and black on light menu bars — no manual colour handling needed.
     private static let image: NSImage? = {
         guard let url = Bundle.main.url(forResource: "code", withExtension: "svg"),
               let img = NSImage(contentsOf: url) else { return nil }
@@ -77,7 +83,7 @@ private struct CodeMenuIcon: View {
             Image(nsImage: img)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 15, height: 15)
+                .frame(width: 11, height: 11)
         }
     }
 }
