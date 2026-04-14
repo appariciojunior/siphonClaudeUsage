@@ -22,6 +22,7 @@
 		CB000000000000000000B013 /* Inter-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB000000000000000000F014 /* Inter-Medium.ttf */; };
 		CB000000000000000000B014 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB000000000000000000F015 /* Inter-SemiBold.ttf */; };
 		CB000000000000000000B015 /* Inter-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB000000000000000000F016 /* Inter-Bold.ttf */; };
+		CB000000000000000000B016 /* code.svg in Resources */ = {isa = PBXBuildFile; fileRef = CB000000000000000000F017 /* code.svg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		CB000000000000000000F014 /* Inter-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.ttf"; sourceTree = "<group>"; };
 		CB000000000000000000F015 /* Inter-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.ttf"; sourceTree = "<group>"; };
 		CB000000000000000000F016 /* Inter-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.ttf"; sourceTree = "<group>"; };
+		CB000000000000000000F017 /* code.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; path = code.svg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +78,7 @@
 			children = (
 				CB000000000000000000F001 /* SiphonApp.swift */,
 				CB000000000000000000F002 /* UsageStore.swift */,
+				CB000000000000000000F017 /* code.svg */,
 				CB000000000000000000G002 /* Models */,
 				CB000000000000000000G003 /* Services */,
 				CB000000000000000000G004 /* Views */,
@@ -189,6 +192,7 @@
 				CB000000000000000000B013 /* Inter-Medium.ttf in Resources */,
 				CB000000000000000000B014 /* Inter-SemiBold.ttf in Resources */,
 				CB000000000000000000B015 /* Inter-Bold.ttf in Resources */,
+				CB000000000000000000B016 /* code.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreText
+import AppKit
 
 @main
 struct SiphonApp: App {
@@ -53,10 +54,30 @@ private struct MenuBarLabel: View {
                         .foregroundStyle(weekColor)
                 }
             } else {
-                PhosphorDrop()
-                    .fill(.orange)
-                    .frame(width: 13, height: 13)
+                CodeMenuIcon()
             }
+        }
+    }
+}
+
+// MARK: - Code icon (light/dark adaptive template image)
+
+private struct CodeMenuIcon: View {
+    /// Loaded once, marked as template so AppKit renders it white on dark
+    /// menu bars and black on light menu bars automatically.
+    private static let image: NSImage? = {
+        guard let url = Bundle.main.url(forResource: "code", withExtension: "svg"),
+              let img = NSImage(contentsOf: url) else { return nil }
+        img.isTemplate = true
+        return img
+    }()
+
+    var body: some View {
+        if let img = Self.image {
+            Image(nsImage: img)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 15, height: 15)
         }
     }
 }
