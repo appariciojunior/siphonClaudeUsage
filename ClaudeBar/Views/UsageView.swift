@@ -245,7 +245,7 @@ struct UsageView: View {
     }
 
     private func barColor(_ pct: Double) -> Color {
-        pct >= 90 ? .red : pct >= 70 ? .orange : .green
+        pct >= 76 ? .red : pct >= 31 ? .orange : .green
     }
 
     private func formatTokens(_ n: Int) -> String {

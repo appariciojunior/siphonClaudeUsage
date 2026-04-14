@@ -43,7 +43,7 @@ private struct MenuBarLabel: View {
 
             if let q = store.quota, let session = q.session {
                 // Signed in: icon + session % · weekly %
-                let sessionColor: Color = session.percent >= 90 ? .red : session.percent >= 70 ? .orange : .green
+                let sessionColor: Color = session.percent >= 76 ? .red : session.percent >= 31 ? .orange : .green
                 Text("\(Int(session.percent.rounded()))%")
                     .font(.custom("Inter-SemiBold", size: 11))
                     .foregroundStyle(sessionColor)
@@ -52,7 +52,7 @@ private struct MenuBarLabel: View {
                     Text("·")
                         .font(.system(size: 9))
                         .foregroundStyle(.secondary)
-                    let weekColor: Color = weekly.percent >= 90 ? .red : weekly.percent >= 70 ? .orange : .primary
+                    let weekColor: Color = weekly.percent >= 76 ? .red : weekly.percent >= 31 ? .orange : .green
                     Text("\(Int(weekly.percent.rounded()))%")
                         .font(.custom("Inter-SemiBold", size: 11))
                         .foregroundStyle(weekColor)
@@ -60,7 +60,7 @@ private struct MenuBarLabel: View {
             } else {
                 // Logged out: icon + "Siphon"
                 Text("Siphon")
-                    .font(.custom("Inter-SemiBold", size: 12))
+                    .font(.custom("Inter-SemiBold", size: 11))
             }
         }
     }
@@ -83,7 +83,7 @@ private struct CodeMenuIcon: View {
             Image(nsImage: img)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 11, height: 11)
+                .frame(width: 8, height: 8)
         }
     }
 }
