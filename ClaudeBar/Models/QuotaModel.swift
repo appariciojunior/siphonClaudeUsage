@@ -32,7 +32,10 @@ struct UsagePeriod: Codable {
 
     var resetDate: Date? {
         guard let s = resetsAt else { return nil }
-        return ISO8601DateFormatter().date(from: s)
+        let f = ISO8601DateFormatter()
+        if let d = f.date(from: s) { return d }
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.date(from: s)
     }
 }
 

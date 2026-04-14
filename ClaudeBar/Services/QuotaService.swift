@@ -83,7 +83,11 @@ private struct RawBucket: Codable {
 
     var resetDate: Date? {
         guard let s = resetsAt else { return nil }
-        return ISO8601DateFormatter().date(from: s)
+        // Try standard ISO-8601 first, then with fractional seconds (e.g. "2025-04-17T15:00:00.000Z")
+        let f = ISO8601DateFormatter()
+        if let d = f.date(from: s) { return d }
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.date(from: s)
     }
 }
 
