@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import UserNotifications
 
 @MainActor
 final class UsageStore: ObservableObject {
@@ -31,6 +32,10 @@ final class UsageStore: ObservableObject {
     private let tokenStore   = TokenStore.shared
     private var timer:        Timer?
 
+    // Notification tracking — reset when a session restarts
+    private var notifiedThresholds: Set<Int> = []
+    private var lastSessionPercent: Double    = 0
+
     init() {
         isSignedIn = tokenStore.load() != nil
         refresh()
@@ -41,6 +46,46 @@ final class UsageStore: ObservableObject {
                 if self?.isSignedIn == true { await self?.refreshQuota() }
             }
         }
+        requestNotificationPermission()
+    }
+
+    // MARK: - Notifications
+
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current()
+            .requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
+    private func checkSessionWarning(_ quota: PlanQuota) {
+        guard let session = quota.session else { return }
+        let pct = session.percent
+
+        // Session reset — clear fired thresholds so warnings fire again next session
+        if pct < lastSessionPercent - 15 {
+            notifiedThresholds.removeAll()
+        }
+        lastSessionPercent = pct
+
+        // Fire at 90 % then again at 95 %
+        for threshold in [90, 95] where pct >= Double(threshold) && !notifiedThresholds.contains(threshold) {
+            notifiedThresholds.insert(threshold)
+            sendSessionWarning(percent: Int(pct.rounded()), resetsIn: session.resetsInString)
+        }
+    }
+
+    private func sendSessionWarning(percent: Int, resetsIn: String) {
+        let content          = UNMutableNotificationContent()
+        content.title        = "Session \(percent)% used"
+        content.body         = "Your session resets in \(resetsIn). You can continue with paid credits once the limit is reached."
+        content.sound        = .default
+        content.interruptionLevel = .timeSensitive
+
+        let request = UNNotificationRequest(
+            identifier: "siphon-session-\(percent)",
+            content: content,
+            trigger: nil    // deliver immediately
+        )
+        UNUserNotificationCenter.current().add(request)
     }
 
     // MARK: - Local data
@@ -83,9 +128,11 @@ final class UsageStore: ObservableObject {
 
     func refreshQuota() async {
         do {
-            quota      = try await quotaService.fetch()
+            let fresh  = try await quotaService.fetch()
+            quota      = fresh
             quotaError = nil
             isSignedIn = true
+            checkSessionWarning(fresh)
         } catch QuotaError.notSignedIn {
             isSignedIn = false
             quota      = nil
