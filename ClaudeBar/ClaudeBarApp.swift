@@ -1,8 +1,13 @@
 import SwiftUI
+import CoreText
 
 @main
-struct ClaudeBarApp: App {
+struct SiphonApp: App {
     @StateObject private var store = UsageStore()
+
+    init() {
+        registerBundledFonts()
+    }
 
     var body: some Scene {
         MenuBarExtra {
@@ -13,7 +18,19 @@ struct ClaudeBarApp: App {
         }
         .menuBarExtraStyle(.window)
     }
+
+    // MARK: - Font registration
+
+    private func registerBundledFonts() {
+        let names = ["Inter-Regular", "Inter-Medium", "Inter-SemiBold", "Inter-Bold"]
+        for name in names {
+            guard let url = Bundle.main.url(forResource: name, withExtension: "ttf") else { continue }
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        }
+    }
 }
+
+// MARK: - Menu bar label
 
 private struct MenuBarLabel: View {
     @ObservedObject var store: UsageStore
@@ -21,10 +38,9 @@ private struct MenuBarLabel: View {
     var body: some View {
         HStack(spacing: 5) {
             if let q = store.quota, let session = q.session {
-                // Session % in session color
                 let sessionColor: Color = session.percent >= 90 ? .red : session.percent >= 70 ? .orange : .green
                 Text("\(Int(session.percent.rounded()))%")
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .font(.custom("Inter-SemiBold", size: 11))
                     .foregroundStyle(sessionColor)
 
                 if let weekly = q.weeklyAll {
@@ -33,13 +49,13 @@ private struct MenuBarLabel: View {
                         .foregroundStyle(.secondary)
                     let weekColor: Color = weekly.percent >= 90 ? .red : weekly.percent >= 70 ? .orange : .primary
                     Text("\(Int(weekly.percent.rounded()))%")
-                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .font(.custom("Inter-SemiBold", size: 11))
                         .foregroundStyle(weekColor)
                 }
             } else {
-                Image(systemName: "bolt.fill")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.orange)
+                PhosphorDrop()
+                    .fill(.orange)
+                    .frame(width: 13, height: 13)
             }
         }
     }

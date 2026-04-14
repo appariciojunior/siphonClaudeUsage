@@ -1,8 +1,8 @@
-# ClaudeBar
+# Siphon
 
 A lightweight macOS menu bar app that shows your **Claude AI usage in real time** — plan limits, token costs, and session/weekly quotas, all from the menu bar.
 
-![ClaudeBar menu bar](https://img.shields.io/badge/macOS-13%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.9-orange) ![License](https://img.shields.io/badge/license-MIT-green)
+![Siphon menu bar](https://img.shields.io/badge/macOS-13%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.9-orange) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
 
@@ -18,7 +18,6 @@ A lightweight macOS menu bar app that shows your **Claude AI usage in real time*
 | Weekly limit % (all models + Sonnet) | claude.ai OAuth API |
 | Today's token cost (USD) | `~/.claude/readout-cost-cache.json` |
 | This month's token cost (USD) | `~/.claude/readout-cost-cache.json` |
-| Cost per model (Opus / Sonnet / Haiku) | local pricing file |
 
 Data refreshes automatically every 30 seconds.
 
@@ -34,9 +33,9 @@ Data refreshes automatically every 30 seconds.
 
 ## Install (DMG — recommended)
 
-1. Download **ClaudeBar.dmg** from [Releases](../../releases)
-2. Open the DMG and drag **ClaudeBar.app** into your Applications folder
-3. Launch ClaudeBar from Applications
+1. Download **Siphon.dmg** from [Releases](../../releases)
+2. Open the DMG and drag **Siphon.app** into your Applications folder
+3. Launch Siphon from Applications
 
 > **First launch on macOS**: Apple will block an unnotarised app. Right-click → **Open** → **Open** to bypass Gatekeeper — you only need to do this once.
 
@@ -44,14 +43,14 @@ Data refreshes automatically every 30 seconds.
 
 ## Sign in to see plan limits
 
-ClaudeBar uses the **same OAuth flow as Claude Code** — no passwords, no cookies.
+Siphon uses the **same OAuth flow as Claude Code** — no passwords, no cookies.
 
 1. Click the menu bar icon → **Sign in with Claude**
 2. Your browser opens Claude's authorisation page — approve it
 3. After approving, **copy the full URL** from the browser address bar
-4. Paste it into ClaudeBar → **Submit**
+4. Paste it into Siphon → **Submit**
 
-Credentials are stored securely at `~/.config/claudebar/credentials.json` (user-only permissions, `0600`). Tokens refresh automatically.
+Credentials are stored securely at `~/.config/siphon/credentials.json` (user-only permissions, `0600`). Tokens refresh automatically.
 
 ---
 
@@ -65,8 +64,8 @@ Credentials are stored securely at `~/.config/claudebar/credentials.json` (user-
 ### Steps
 
 ```bash
-git clone https://github.com/yourname/claudebar
-cd claudebar
+git clone https://github.com/yourname/siphon
+cd siphon
 
 # Open in Xcode
 open ClaudeBar.xcodeproj
@@ -85,14 +84,15 @@ xcodebuild \
   -configuration Release \
   -derivedDataPath build \
   CODE_SIGN_IDENTITY="-" \
-  CODE_SIGNING_REQUIRED=NO
+  CODE_SIGNING_REQUIRED=NO \
+  PRODUCT_NAME=Siphon
 
 # Package
-APP="build/Build/Products/Release/ClaudeBar.app"
+APP="build/Build/Products/Release/Siphon.app"
 mkdir -p /tmp/dmg_stage
 cp -R "$APP" /tmp/dmg_stage/
 ln -s /Applications /tmp/dmg_stage/Applications
-hdiutil create -volname ClaudeBar -srcfolder /tmp/dmg_stage -format UDZO ClaudeBar.dmg
+hdiutil create -volname Siphon -srcfolder /tmp/dmg_stage -format UDZO Siphon.dmg
 rm -rf /tmp/dmg_stage
 ```
 
@@ -102,13 +102,13 @@ rm -rf /tmp/dmg_stage
 
 ### Token cost data (local, no auth needed)
 
-Claude Code writes per-model token usage to `~/.claude/readout-cost-cache.json` after every conversation turn. ClaudeBar reads this file directly — no network call required for cost tracking.
+Claude Code writes per-model token usage to `~/.claude/readout-cost-cache.json` after every conversation turn. Siphon reads this file directly — no network call required for cost tracking.
 
 Pricing is read from `~/.claude/readout-pricing.json` (also maintained by Claude Code). Costs include input, output, cache-read, and cache-write tokens.
 
 ### Plan usage limits (OAuth)
 
-ClaudeBar uses Anthropic's official OAuth PKCE flow (client ID `9d1c250a-e61b-44d9-88ed-5944d1962f5e` — the same one Claude Code uses) to fetch your plan quotas from:
+Siphon uses Anthropic's official OAuth PKCE flow (client ID `9d1c250a-e61b-44d9-88ed-5944d1962f5e` — the same one Claude Code uses) to fetch your plan quotas from:
 
 ```
 GET https://api.anthropic.com/api/oauth/usage
@@ -124,7 +124,7 @@ The response includes `five_hour` (current session) and `seven_day` (weekly) uti
 
 ```
 ClaudeBar/
-├── ClaudeBarApp.swift          # App entry point, menu bar label
+├── ClaudeBarApp.swift          # App entry point, menu bar label, font registration
 ├── UsageStore.swift            # State, refresh logic, OAuth flow coordinator
 ├── Models/
 │   ├── UsageModel.swift        # Local token data models + pricing
@@ -134,17 +134,23 @@ ClaudeBar/
 │   ├── OAuthService.swift      # PKCE flow, token exchange
 │   ├── QuotaService.swift      # Calls the OAuth usage endpoint
 │   └── TokenStore.swift        # Persists credentials to disk
-└── Views/
-    └── UsageView.swift         # Menu bar popover UI
+├── Views/
+│   ├── UsageView.swift         # Menu bar popover UI
+│   └── PhosphorDrop.swift      # Phosphor "drop" icon (MIT)
+└── Fonts/
+    ├── Inter-Regular.ttf
+    ├── Inter-Medium.ttf
+    ├── Inter-SemiBold.ttf
+    └── Inter-Bold.ttf
 ```
 
 ---
 
 ## Privacy
 
-- **No telemetry.** ClaudeBar never sends your data anywhere except Anthropic's own API.
+- **No telemetry.** Siphon never sends your data anywhere except Anthropic's own API.
 - **Local files only.** Token cost data is read directly from your disk.
-- **Credentials stored locally.** OAuth tokens live at `~/.config/claudebar/credentials.json` with `0600` permissions — readable only by your user account.
+- **Credentials stored locally.** OAuth tokens live at `~/.config/siphon/credentials.json` with `0600` permissions — readable only by your user account.
 
 ---
 

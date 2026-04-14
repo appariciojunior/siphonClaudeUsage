@@ -20,7 +20,7 @@ final class TokenStore {
 
     private let dir: URL = {
         let base = FileManager.default.homeDirectoryForCurrentUser
-            .appending(path: ".config/claudebar", directoryHint: .isDirectory)
+            .appending(path: ".config/siphon", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         // Secure permissions
         try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: base.path)
