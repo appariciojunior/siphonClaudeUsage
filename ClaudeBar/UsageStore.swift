@@ -36,14 +36,26 @@ final class UsageStore: ObservableObject {
     private var notifiedThresholds: Set<Int> = []
     private var lastSessionPercent: Double    = 0
 
+    // Rate-limit backoff — skip quota fetches until this date
+    private var rateLimitedUntil: Date?
+    // Throttle: only call the quota API once every 2 minutes in the background timer
+    private var lastQuotaFetch:   Date?
+    private let quotaPollInterval: TimeInterval = 120
+
     init() {
         isSignedIn = tokenStore.load() != nil
         refresh()
         if isSignedIn { Task { await refreshQuota() } }
+        // Local file: every 30 s.  Quota API: max once every 2 min (avoids 429s).
         timer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
-                self?.refresh()
-                if self?.isSignedIn == true { await self?.refreshQuota() }
+                guard let self else { return }
+                self.refresh()
+                guard self.isSignedIn else { return }
+                let now = Date()
+                if let last = self.lastQuotaFetch, now.timeIntervalSince(last) < self.quotaPollInterval { return }
+                self.lastQuotaFetch = now
+                await self.refreshQuota()
             }
         }
         requestNotificationPermission()
@@ -127,6 +139,10 @@ final class UsageStore: ObservableObject {
     // MARK: - Quota
 
     func refreshQuota() async {
+        // Honour rate-limit backoff — skip the network call silently
+        if let until = rateLimitedUntil, Date() < until { return }
+        lastQuotaFetch = Date()
+
         do {
             let fresh  = try await quotaService.fetch()
             quota      = fresh
@@ -136,6 +152,10 @@ final class UsageStore: ObservableObject {
         } catch QuotaError.notSignedIn {
             isSignedIn = false
             quota      = nil
+        } catch QuotaError.rateLimited(let retryAfter) {
+            // Keep the last good quota visible; back off silently
+            rateLimitedUntil = Date().addingTimeInterval(retryAfter)
+            quotaError       = nil   // clear any old error
         } catch {
             quotaError = error.localizedDescription
         }

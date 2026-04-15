@@ -23,6 +23,11 @@ struct QuotaService {
         case 401:
             store.clear()
             throw QuotaError.unauthorized
+        case 429:
+            // Respect Retry-After header if present, otherwise back off 5 min
+            let retryAfter = http.value(forHTTPHeaderField: "Retry-After")
+                .flatMap(Double.init) ?? 300
+            throw QuotaError.rateLimited(retryAfter: retryAfter)
         default:
             throw QuotaError.server(http.statusCode)
         }
@@ -111,14 +116,16 @@ enum QuotaError: LocalizedError {
     case notSignedIn
     case badResponse
     case unauthorized
+    case rateLimited(retryAfter: Double)
     case server(Int)
 
     var errorDescription: String? {
         switch self {
-        case .notSignedIn:   return "Not signed in"
-        case .badResponse:   return "Unexpected response"
-        case .unauthorized:  return "Session expired — please sign in again"
-        case .server(let c): return "Server error (\(c))"
+        case .notSignedIn:               return "Not signed in"
+        case .badResponse:               return "Unexpected response"
+        case .unauthorized:              return "Session expired — please sign in again"
+        case .rateLimited:               return nil   // handled silently
+        case .server(let c):             return "Server error (\(c))"
         }
     }
 }
