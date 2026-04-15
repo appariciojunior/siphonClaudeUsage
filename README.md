@@ -70,11 +70,11 @@ Credentials are stored securely at `~/.config/siphon/credentials.json` (user-onl
 ### Steps
 
 ```bash
-git clone https://github.com/yourname/siphon
-cd siphon
+git clone https://github.com/appariciojunior/siphonClaudeUsage
+cd siphonClaudeUsage
 
 # Open in Xcode
-open ClaudeBar.xcodeproj
+open Siphon.xcodeproj
 ```
 
 1. In Xcode, select your development team under **Signing & Capabilities**
@@ -85,13 +85,12 @@ open ClaudeBar.xcodeproj
 ```bash
 # Build
 xcodebuild \
-  -project ClaudeBar.xcodeproj \
-  -scheme ClaudeBar \
+  -project Siphon.xcodeproj \
+  -scheme Siphon \
   -configuration Release \
   -derivedDataPath build \
   CODE_SIGN_IDENTITY="-" \
-  CODE_SIGNING_REQUIRED=NO \
-  PRODUCT_NAME=Siphon
+  CODE_SIGNING_REQUIRED=NO
 
 # Package
 APP="build/Build/Products/Release/Siphon.app"
@@ -129,8 +128,8 @@ The response includes `five_hour` (current session) and `seven_day` (weekly) uti
 ## Project structure
 
 ```
-ClaudeBar/
-├── ClaudeBarApp.swift          # App entry point, menu bar label, font registration
+Siphon/
+├── SiphonApp.swift             # App entry point, menu bar label, font registration
 ├── UsageStore.swift            # State, refresh logic, OAuth flow coordinator
 ├── Models/
 │   ├── UsageModel.swift        # Local token data models + pricing
