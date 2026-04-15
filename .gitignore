@@ -6,6 +6,10 @@ DerivedData/
 xcuserdata/
 *.moved-aside
 *.pbxuser
+*.xcworkspace/
+
+# Claude Code session data
+.claude/
 
 # macOS
 .DS_Store
