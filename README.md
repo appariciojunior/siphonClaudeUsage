@@ -1,5 +1,11 @@
 # Siphon
 
+---
+
+<img width="355" height="619" alt="Screenshot 2026-04-15 at 09 04 41" src="https://github.com/user-attachments/assets/308728d5-384d-46d9-a42e-04cd6919b98a" />
+
+---
+
 A lightweight macOS menu bar app that shows your **Claude AI usage in real time** — plan limits, token costs, and session/weekly quotas, all from the menu bar.
 
 ![Siphon menu bar](https://img.shields.io/badge/macOS-13%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.9-orange) ![License](https://img.shields.io/badge/license-MIT-green)
