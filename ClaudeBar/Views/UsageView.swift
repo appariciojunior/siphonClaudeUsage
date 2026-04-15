@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 // MARK: - Font helpers
 private extension Font {
@@ -37,7 +38,14 @@ struct UsageView: View {
             }
         }
         .frame(width: 320)
-        .background(.ultraThinMaterial)
+        .background(
+            ZStack {
+                // Frosted glass fill
+                Rectangle().fill(.ultraThinMaterial)
+                // Hook into the window and zero out all corner radii
+                SquareWindowFix()
+            }
+        )
         .overlay(thinBorder)
     }
 
@@ -254,6 +262,32 @@ struct UsageView: View {
     }
 }
 
+// MARK: - Segmented pixel bar
+
+private struct SegmentedBar: View {
+    let percent: Double
+    let color:   Color
+
+    private let segments: Int    = 30
+    private let gap:      CGFloat = 2
+    private let height:   CGFloat = 6
+
+    var body: some View {
+        GeometryReader { geo in
+            let segW   = (geo.size.width - gap * CGFloat(segments - 1)) / CGFloat(segments)
+            let filled = Int((min(percent, 100) / 100.0 * Double(segments)).rounded())
+            HStack(spacing: gap) {
+                ForEach(0..<segments, id: \.self) { i in
+                    Rectangle()
+                        .fill(i < filled ? color : color.opacity(0.15))
+                        .frame(width: max(segW, 1), height: height)
+                }
+            }
+        }
+        .frame(height: height)
+    }
+}
+
 // MARK: - Meter row
 
 private struct MeterRow: View {
@@ -278,15 +312,7 @@ private struct MeterRow: View {
                     .foregroundStyle(color.opacity(0.7))
             }
 
-            GeometryReader { g in
-                ZStack(alignment: .leading) {
-                    Rectangle().fill(color.opacity(0.12)).frame(height: 3)
-                    Rectangle()
-                        .fill(color)
-                        .frame(width: g.size.width * min(slot.percent / 100, 1), height: 3)
-                }
-            }
-            .frame(height: 3)
+            SegmentedBar(percent: slot.percent, color: color)
 
             HStack(spacing: 5) {
                 Text("Resets in \(slot.resetsInString)").font(.inter(12, .medium))
@@ -302,6 +328,53 @@ private struct MeterRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
+    }
+}
+
+// MARK: - Square window fix
+//
+// MenuBarExtra draws its popup in an NSPanel whose background view carries a
+// cornerRadius. We walk every layer in the window hierarchy and zero them out.
+
+private struct SquareWindowFix: NSViewRepresentable {
+
+    func makeNSView(context: Context) -> _SquareFixView {
+        _SquareFixView()
+    }
+    func updateNSView(_ nsView: _SquareFixView, context: Context) {}
+}
+
+final class _SquareFixView: NSView {
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        // Run after the window has fully composed its layer tree
+        DispatchQueue.main.async { [weak window] in
+            guard let window else { return }
+            Self.squareAll(window)
+        }
+    }
+
+    private static func squareAll(_ window: NSWindow) {
+        // Zero every layer cornerRadius in the entire content-view tree
+        func squareView(_ v: NSView) {
+            if v.wantsLayer || v.layer != nil {
+                v.wantsLayer = true
+                v.layer?.cornerRadius = 0
+                v.layer?.cornerCurve  = .circular   // not that it matters at 0, but explicit
+            }
+            v.subviews.forEach(squareView)
+        }
+
+        // Content view + its superview (the panel's "chrome" layer)
+        if let cv = window.contentView {
+            squareView(cv)
+            if let sv = cv.superview { squareView(sv) }
+        }
+
+        // Some macOS versions use child windows for the popover shadow/arrow
+        window.childWindows?.forEach { squareAll($0) }
     }
 }
 
